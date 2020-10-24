@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'SSPlayer_Example' do
+  pod 'SSPlayer', :path => '../'
+
+  target 'SSPlayer_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
