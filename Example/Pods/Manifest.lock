@@ -1,0 +1,16 @@
+PODS:
+  - SSPlayer (0.1.0)
+
+DEPENDENCIES:
+  - SSPlayer (from `../`)
+
+EXTERNAL SOURCES:
+  SSPlayer:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  SSPlayer: 6299c67bde2d7a5f64292dccac0e6ddd45bfdd91
+
+PODFILE CHECKSUM: ed976498d3522848261971fb79746ab16b5e8bd1
+
+COCOAPODS: 1.9.1

@@ -1,0 +1,24 @@
+{
+  "name": "SSPlayer",
+  "version": "0.1.0",
+  "summary": "A short description of SSPlayer.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/lai001/SSPlayer",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "lai001": "1104698042@qq.com"
+  },
+  "source": {
+    "git": "https://github.com/lai001/SSPlayer.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "swift_versions": "5.0",
+  "source_files": "SSPlayer/Classes/**/*",
+  "swift_version": "5.0"
+}

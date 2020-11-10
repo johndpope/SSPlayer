@@ -1,0 +1,6 @@
+framework module SSPlayer {
+  umbrella header "SSPlayer-umbrella.h"
+
+  export *
+  module * { export * }
+}
