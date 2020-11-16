@@ -14,22 +14,33 @@ import AVFoundation
 // https://developer.apple.com/library/archive/qa/qa1820/_index.html
 public class SSPlayerSeeker {
     
-    public typealias CompletionSeekBlock = () -> Void
+    public typealias CompletionSeekBlock = (_ isFinished: Bool) -> Void
     
     private var isSeekInProgress = false
     
     private weak var player: AVPlayer?
     
-    private var chaseTime = CMTime.zero
+    private var chaseTime: CMTime?
 
     internal init(player: AVPlayer) {
         self.player = player
     }
     
     internal func seekSmoothly(to newChaseTime: CMTime, completionSeekBlock: CompletionSeekBlock? = nil) {
-        player?.pause()
-        if CMTimeCompare(newChaseTime, chaseTime) != 0 {
-            chaseTime = newChaseTime;
+        guard let player = self.player else {
+            completionSeekBlock?(false)
+            return
+        }
+        player.pause()
+        if let chaseTime = self.chaseTime {
+            if newChaseTime.compare(chaseTime) != .orderedSame {
+                self.chaseTime = newChaseTime
+                if !isSeekInProgress {
+                    trySeekToChaseTime(completionSeekBlock: completionSeekBlock)
+                }
+            }
+        } else {
+            self.chaseTime = newChaseTime
             if !isSeekInProgress {
                 trySeekToChaseTime(completionSeekBlock: completionSeekBlock)
             }
@@ -39,20 +50,37 @@ public class SSPlayerSeeker {
     private func trySeekToChaseTime(completionSeekBlock: CompletionSeekBlock? = nil) {
         if player?.currentItem?.status == .readyToPlay {
             actuallySeekToTime(completionSeekBlock: completionSeekBlock)
+        } else {
+            completionSeekBlock?(false)
         }
     }
  
     private func actuallySeekToTime(completionSeekBlock: CompletionSeekBlock? = nil) {
+        guard let player = self.player else {
+            completionSeekBlock?(false)
+            return
+        }
         isSeekInProgress = true
-        let seekTimeInProgress = chaseTime
-        player?.seek(to: seekTimeInProgress, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero, completionHandler: { (isFinished:Bool) -> Void in
-            if CMTimeCompare(seekTimeInProgress, self.chaseTime) == 0 {
-                self.isSeekInProgress = false
-                completionSeekBlock?()
-            } else {
-                self.trySeekToChaseTime()
-            }
-        })
+        if let seekTimeInProgress = chaseTime {
+            player.seek(to: seekTimeInProgress, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero, completionHandler: { (isFinished: Bool) -> Void in
+                if let chaseTime = self.chaseTime, seekTimeInProgress.compare(chaseTime) == .orderedSame {
+                    self.isSeekInProgress = false
+                    completionSeekBlock?(isFinished)
+                } else {
+                    self.trySeekToChaseTime(completionSeekBlock: completionSeekBlock)
+                }
+            })
+        } else {
+            completionSeekBlock?(false)
+        }
     }
  
+}
+
+fileprivate extension CMTime {
+    
+    func compare(_ time: CMTime) -> ComparisonResult {
+        return ComparisonResult(rawValue: Int(CMTimeCompare(self, time))) ?? .orderedSame
+    }
+    
 }
