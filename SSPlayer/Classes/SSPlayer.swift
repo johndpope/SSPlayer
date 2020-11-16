@@ -82,9 +82,8 @@ open class SSPlayer: AVPlayer {
 // MARK: - observe
 public extension SSPlayer {
     
-    func observePlayingTime(queue: DispatchQueue = .main, block: @escaping (_ time: CMTime) -> Void) {
-        let interval = CMTime(value: 30, timescale: 600)
-        
+    func observePlayingTime(forInterval interval: CMTime = CMTime(value: 30, timescale: 600), queue: DispatchQueue = .main, block: @escaping (_ time: CMTime) -> Void) {
+//        let interval = CMTime(value: 30, timescale: 600)
         if let timeObserverToken = timeObserverToken {
             removeTimeObserver(timeObserverToken)
         }
