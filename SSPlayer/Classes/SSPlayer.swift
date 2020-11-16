@@ -28,7 +28,7 @@ open class SSPlayer: AVPlayer {
     
     private lazy var seeker: SSPlayerSeeker = {
         var seeker: SSPlayerSeeker = .init(player: self)
-        seeker.seekSmoothly(to: .zero)
+//        seeker.seekSmoothly(to: .zero)
         return seeker
     }()
     

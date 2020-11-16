@@ -33,7 +33,9 @@ public class SSPlayerSeeker {
         }
         player.pause()
         if let chaseTime = self.chaseTime {
-            if newChaseTime.compare(chaseTime) != .orderedSame {
+            if newChaseTime.compare(chaseTime) == .orderedSame {
+                completionSeekBlock?(!isSeekInProgress)
+            } else {
                 self.chaseTime = newChaseTime
                 if !isSeekInProgress {
                     trySeekToChaseTime(completionSeekBlock: completionSeekBlock)
