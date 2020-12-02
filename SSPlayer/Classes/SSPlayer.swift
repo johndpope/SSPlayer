@@ -39,6 +39,11 @@ open class SSPlayer: AVPlayer {
         timeObserverToken = nil
     }
     
+    open override func replaceCurrentItem(with item: AVPlayerItem?) {
+        super.replaceCurrentItem(with: item)
+        seeker.reset()
+    }
+    
     open override func seek(to time: CMTime) {
         if canSeekTo(time: time) {
             super.seek(to: time)

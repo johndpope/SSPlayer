@@ -26,6 +26,11 @@ public class SSPlayerSeeker {
         self.player = player
     }
     
+    internal func reset() {
+        chaseTime = nil
+        isSeekInProgress = false
+    }
+    
     internal func seekSmoothly(to newChaseTime: CMTime, completionSeekBlock: CompletionSeekBlock? = nil) {
         guard let player = self.player else {
             completionSeekBlock?(false)
