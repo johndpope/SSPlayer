@@ -133,28 +133,7 @@ public extension SSPlayer {
     }
     
     func resetToBeginTime(autoPlay: Bool, resultHandler: @escaping (Bool) -> Void) {
-        guard let item = currentItem else {
-            resultHandler(false)
-            return
-        }
-        if item.status == .readyToPlay {
-            self.pause()
-            self.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] (success: Bool) in
-                guard let self = self else {
-                    return
-                }
-                if success {
-                    if autoPlay {
-                        self.play()
-                    }
-                    resultHandler(true)
-                } else {
-                    resultHandler(false)
-                }
-            }
-        } else {
-            resultHandler(false)
-        }
+        reset(to: .zero, autoPlay: autoPlay, resultHandler: resultHandler)
     }
     
     func reset(to time: CMTime, autoPlay: Bool, resultHandler: @escaping (Bool) -> Void) {
