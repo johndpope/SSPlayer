@@ -50,7 +50,7 @@ open class SSAVPlayerItem: AVPlayerItem {
         }
     }
     
-    func requestWhenReady(closure: @escaping () -> Void) {
+    public func requestWhenReady(closure: @escaping () -> Void) {
         if self.status == .readyToPlay {
             closure()
         } else {
