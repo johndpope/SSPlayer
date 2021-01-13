@@ -16,6 +16,7 @@ open class SSAVPlayerItem: AVPlayerItem {
     private var playerItemContext = 0
     
     public var statusChangeAction: (( _ item: SSAVPlayerItem, _ status: AVPlayerItem.Status, _ isReadToPlay: Bool ) -> Void)?
+    private var _statusChangeAction: (( _ item: SSAVPlayerItem, _ status: AVPlayerItem.Status, _ isReadToPlay: Bool ) -> Void)?
     
     override init(asset: AVAsset, automaticallyLoadedAssetKeys: [String]?) {
         super.init(asset: asset, automaticallyLoadedAssetKeys: automaticallyLoadedAssetKeys)
@@ -44,7 +45,21 @@ open class SSAVPlayerItem: AVPlayerItem {
                 
             } else {
                 statusChangeAction?(self, status, status == .readyToPlay)
+                _statusChangeAction?(self, status, status == .readyToPlay)
             }
         }
     }
+    
+    func requestWhenReady(closure: @escaping () -> Void) {
+        if self.status == .readyToPlay {
+            closure()
+        } else {
+            _statusChangeAction = { item, status, isReadToPlay in
+                if isReadToPlay {
+                    closure()
+                }
+            }
+        }
+    }
+    
 }
