@@ -45,49 +45,59 @@ open class SSPlayer: AVPlayer {
     }
     
     open override func seek(to time: CMTime) {
-        if canSeekTo(time: time) {
+        if canSeek(to: time) {
             super.seek(to: time)
         }
     }
     
     open override func seek(to time: CMTime, completionHandler: @escaping (Bool) -> Void) {
-        if canSeekTo(time: time) {
+        if canSeek(to: time) {
             super.seek(to: time, completionHandler: completionHandler)
         }
     }
     
     open override func seek(to time: CMTime, toleranceBefore: CMTime, toleranceAfter: CMTime) {
-        if canSeekTo(time: time) {
+        if canSeek(to: time) {
             super.seek(to: time, toleranceBefore: toleranceBefore, toleranceAfter: toleranceAfter)
         }
     }
     
     open override func seek(to time: CMTime, toleranceBefore: CMTime, toleranceAfter: CMTime, completionHandler: @escaping (Bool) -> Void) {
-        if canSeekTo(time: time) {
+        if canSeek(to: time) {
             super.seek(to: time, toleranceBefore: toleranceBefore, toleranceAfter: toleranceAfter, completionHandler: completionHandler)
         }
     }
     
     open override func play() {
         guard let currentItem = self.currentItem else {
+            active()
             super.play()
             return
         }
         if CMTimeCompare(currentTime(), currentItem.duration) > -1 {
             self.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero) { _ in
+                self.active()
                 super.play()
             }
         } else {
+            active()
             super.play()
         }
     }
     
-}
-
-// MARK: - observe
-public extension SSPlayer {
+    private func active() {
+        guard AVAudioSession.sharedInstance().category != .playback else {
+            return
+        }
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback)
+            try AVAudioSession.sharedInstance().setActive(true, options: [])
+        } catch let error {
+            debugPrint(error.localizedDescription)
+        }
+    }
     
-    func observePlayingTime(forInterval interval: CMTime = CMTime(value: 30, timescale: 600), queue: DispatchQueue = .main, block: @escaping (_ time: CMTime) -> Void) {
+    open func observePlayingTime(forInterval interval: CMTime = CMTime(value: 30, timescale: 600), queue: DispatchQueue = .main, block: @escaping (_ time: CMTime) -> Void) {
 //        let interval = CMTime(value: 30, timescale: 600)
         if let timeObserverToken = timeObserverToken {
             removeTimeObserver(timeObserverToken)
@@ -98,45 +108,24 @@ public extension SSPlayer {
         }
     }
     
-    func removePlayingTimeObserver() {
+    public func removePlayingTimeObserver() {
         if let timeObserverToken = timeObserverToken {
             removeTimeObserver(timeObserverToken)
         }
         timeObserverToken = nil
     }
-
-}
-
-public extension SSPlayer {
     
-    private func canSeekTo(time: CMTime) -> Bool {
-        if time.isIndefinite || time.isValid == false {
-            debugPrint("time is not valid, seek to play time \(time.seconds) fail")
-            return false
-        }
-        guard let currentItem = currentItem else {
-            debugPrint("no playerItem, seek to play time \(time.seconds) fail")
-            return false
-        }
-        
-        if currentItem.status == .readyToPlay {
-            return true
-        }
-        debugPrint("playerItem(\(currentItem.status.rawValue)) not ready to play, seek to play time \(time.seconds) fail")
-        return false
-    }
-    
-    public func seekSmoothly(to newChaseTime: CMTime, completionSeekBlock: SSPlayerSeeker.CompletionSeekBlock? = nil) {
-        if canSeekTo(time: newChaseTime) {
+    open func seekSmoothly(to newChaseTime: CMTime, completionSeekBlock: SSPlayerSeeker.CompletionSeekBlock? = nil) {
+        if canSeek(to: newChaseTime) {
             seeker.seekSmoothly(to: newChaseTime, completionSeekBlock: completionSeekBlock)
         }
     }
     
-    func resetToBeginTime(autoPlay: Bool, resultHandler: @escaping (Bool) -> Void) {
+    open func resetToBeginTime(autoPlay: Bool, resultHandler: @escaping (Bool) -> Void) {
         reset(to: .zero, autoPlay: autoPlay, resultHandler: resultHandler)
     }
     
-    func reset(to time: CMTime, autoPlay: Bool, resultHandler: @escaping (Bool) -> Void) {
+    open func reset(to time: CMTime, autoPlay: Bool, resultHandler: @escaping (Bool) -> Void) {
         guard let item = currentItem else {
             resultHandler(false)
             return
@@ -159,6 +148,27 @@ public extension SSPlayer {
         } else {
             resultHandler(false)
         }
+    }
+    
+}
+
+public extension SSPlayer {
+    
+    private func canSeek(to time: CMTime) -> Bool {
+        if time.isIndefinite || time.isValid == false {
+            debugPrint("time is not valid, seek to play time \(time.seconds) fail")
+            return false
+        }
+        guard let currentItem = currentItem else {
+            debugPrint("no playerItem, seek to play time \(time.seconds) fail")
+            return false
+        }
+        
+        if currentItem.status == .readyToPlay {
+            return true
+        }
+        debugPrint("playerItem(\(currentItem.status.rawValue)) not ready to play, seek to play time \(time.seconds) fail")
+        return false
     }
     
 }
