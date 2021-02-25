@@ -14,12 +14,12 @@ import UIKit
 
 open class SSPlayerView: UIView {
 
-    public init(player: AVPlayer) {
+    public init(player: AVPlayer? = nil) {
         super.init(frame: .zero)
         self.player = player
     }
     
-    public init(frame: CGRect, player: AVPlayer) {
+    public init(frame: CGRect, player: AVPlayer? = nil) {
         super.init(frame: frame)
         self.player = player
     }
